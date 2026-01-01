@@ -1,25 +1,10 @@
 "use server";
 
-import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
-
-function getSupabaseServer() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookies().get(name)?.value;
-        },
-      },
-    }
-  );
-}
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
 export async function addGoal(name: string) {
-  const supabase = getSupabaseServer();
+  const supabase = createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user && name) {
@@ -29,7 +14,7 @@ export async function addGoal(name: string) {
 }
 
 export async function addTask(title: string, goalId: string) {
-    const supabase = getSupabaseServer();
+    const supabase = createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (user && title && goalId) {
@@ -39,20 +24,20 @@ export async function addTask(title: string, goalId: string) {
 }
 
 export async function toggleTask(id: string, is_completed: boolean) {
-    const supabase = getSupabaseServer();
+    const supabase = createServerSupabaseClient();
     await supabase.from("tasks").update({ is_completed: !is_completed }).match({ id });
     revalidatePath("/");
 }
 
 export async function deleteTask(id: string) {
-    const supabase = getSupabaseServer();
+    const supabase = createServerSupabaseClient();
     await supabase.from("tasks").delete().match({ id });
     revalidatePath("/");
 }
 
 
 export async function logPomodoroSession(taskId: string, durationMinutes: number) {
-  const supabase = getSupabaseServer();
+  const supabase = createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user || !taskId) return;

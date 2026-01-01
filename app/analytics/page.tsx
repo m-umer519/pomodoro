@@ -1,29 +1,15 @@
-import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
 import { subDays, format } from 'date-fns';
 import Header from "@/components/Header";
 import ProductivityChart from "@/components/ProductivityChart";
 import GoalBreakdown from "@/components/GoalBreakdown";
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
 export const dynamic = 'force-dynamic';
 
-function getSupabaseServer() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookies().get(name)?.value;
-        },
-      },
-    }
-  );
-}
-
 export default async function AnalyticsPage() {
-    const supabase = getSupabaseServer();
+    const supabase = createServerSupabaseClient();
     const { data: { session } } = await supabase.auth.getSession();
+    const userEmail = session?.user?.email;
 
     // Fetch sessions from the last 30 days
     const thirtyDaysAgo = subDays(new Date(), 30).toISOString();
@@ -68,7 +54,7 @@ export default async function AnalyticsPage() {
 
     return (
         <main>
-            <Header />
+            <Header email={userEmail} />
             <div className="container mx-auto p-4">
                 <h1 className="text-3xl font-bold mb-6">Your Productivity Dashboard</h1>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

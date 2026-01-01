@@ -42,7 +42,7 @@ export default async function Home() {
         </div>
         <div className="lg:col-span-1">
           <h2 className="text-2xl font-bold mb-4">Timer</h2>
-          <PomodoroTimer allTasks={allTasks.filter(t => !t.is_completed)} />
+          <PomodoroTimer tasks={allTasks.filter(t => !t.is_completed)} />
         </div>
       </main>
     </>
