@@ -1,13 +1,25 @@
 "use server";
 
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { supabase } from "./lib/supabaseClient";
 
-// ... (addGoal, addTask, toggleTask, deleteTask functions remain the same)
+function getSupabaseServer() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookies().get(name)?.value;
+        },
+      },
+    }
+  );
+}
+
 export async function addGoal(name: string) {
-  const supabase = createServerActionClient({ cookies });
+  const supabase = getSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user && name) {
@@ -17,7 +29,7 @@ export async function addGoal(name: string) {
 }
 
 export async function addTask(title: string, goalId: string) {
-    const supabase = createServerActionClient({ cookies });
+    const supabase = getSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (user && title && goalId) {
@@ -27,21 +39,20 @@ export async function addTask(title: string, goalId: string) {
 }
 
 export async function toggleTask(id: string, is_completed: boolean) {
-    const supabase = createServerActionClient({ cookies });
+    const supabase = getSupabaseServer();
     await supabase.from("tasks").update({ is_completed: !is_completed }).match({ id });
     revalidatePath("/");
 }
 
 export async function deleteTask(id: string) {
-    const supabase = createServerActionClient({ cookies });
+    const supabase = getSupabaseServer();
     await supabase.from("tasks").delete().match({ id });
     revalidatePath("/");
 }
 
 
-// NEW FUNCTION
 export async function logPomodoroSession(taskId: string, durationMinutes: number) {
-  const supabase = createServerActionClient({ cookies });
+  const supabase = getSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user || !taskId) return;

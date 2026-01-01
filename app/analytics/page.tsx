@@ -1,4 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { subDays, format } from 'date-fns';
 import Header from "@/components/Header";
@@ -7,8 +7,22 @@ import GoalBreakdown from "@/components/GoalBreakdown";
 
 export const dynamic = 'force-dynamic';
 
+function getSupabaseServer() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookies().get(name)?.value;
+        },
+      },
+    }
+  );
+}
+
 export default async function AnalyticsPage() {
-    const supabase = createServerComponentClient({ cookies });
+    const supabase = getSupabaseServer();
     const { data: { session } } = await supabase.auth.getSession();
 
     // Fetch sessions from the last 30 days
