@@ -40,11 +40,8 @@ export default function AuthForm() {
         
         // Check if user was auto-confirmed (when email confirmation is disabled)
         if (data.user && data.session) {
-          setMessage('Account created and logged in successfully!');
-          // Wait a bit for the session to be fully set
-          await new Promise(resolve => setTimeout(resolve, 500));
-          router.push('/');
-          router.refresh();
+          // Session is set, redirect immediately
+          window.location.replace('/');
         } else {
           setError('Please check your email to confirm your account before signing in.');
           setLoading(false);
@@ -55,11 +52,8 @@ export default function AuthForm() {
         if (error) throw error;
         
         if (data.session) {
-          setMessage('Logged in successfully!');
-          // Wait a bit for the session to be fully set
-          await new Promise(resolve => setTimeout(resolve, 500));
-          router.push('/');
-          router.refresh();
+          // Session is set, redirect immediately
+          window.location.replace('/');
         } else {
           throw new Error('No session returned');
         }
